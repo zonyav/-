@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="description" content="Полный конспект первого урока о больших языковых моделях: от токенов и Transformer до промптинга, LoRA, RAG и практических тестов.">
+  <meta name="description" content="Полный конспект первого урока о NLP и больших языковых моделях: задачи NLP, токены, Transformer, промптинг, LoRA, RAG, метрики качества и практические тесты.">
   <title>Урок 01 — Введение в большие языковые модели</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%236B4636'/%3E%3Cpath d='M18 17h28v7H26v6h17v7H26v6h20v7H18z' fill='%23FAF9F7'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -296,6 +296,22 @@
     .term-item dt { margin-bottom: 6px; color: var(--accent); font-family: var(--mono); font-size: 13px; font-weight: 500; }
     .term-item dd { margin: 0; color: var(--muted); font-size: 15px; }
 
+    .probability-demo { margin-top: 28px; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+    .probability-prompt { margin-bottom: 18px; font-family: var(--serif); font-size: 24px; }
+    .probability-row { display: grid; grid-template-columns: 110px 52px minmax(0, 1fr); align-items: center; gap: 10px; margin-top: 9px; }
+    .probability-token { font-weight: 600; }
+    .probability-value { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+    .probability-track { height: 12px; overflow: hidden; border-radius: var(--radius); background: var(--surface-soft); }
+    .probability-track span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+
+    .metric-formulas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 28px; }
+    .metric-formula { padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+    .metric-formula strong { display: block; margin-bottom: 8px; color: var(--accent); }
+    .metric-expression { font-family: var(--mono); font-size: 14px; overflow-wrap: anywhere; }
+    .metric-formula p { margin-top: 10px; color: var(--muted); font-size: 14px; }
+    .source-note { margin-top: 30px; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius); color: var(--muted); font-size: 13px; }
+    .source-note a { color: var(--accent); font-weight: 600; }
+
     .hierarchy { display: grid; gap: 9px; margin-top: 30px; }
     .hierarchy-item { padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
     .hierarchy-item:nth-child(2) { margin-left: 5%; }
@@ -384,6 +400,8 @@
       .hero h1 { font-size: clamp(46px, 15vw, 68px); }
       .hero-meta, .grid-2, .grid-3, .pipeline { grid-template-columns: 1fr; }
       .term-grid { grid-template-columns: 1fr; }
+      .metric-formulas { grid-template-columns: 1fr; }
+      .probability-row { grid-template-columns: 78px 44px minmax(0, 1fr); gap: 7px; }
       .pipeline-step::after { display: none; }
       .chapter { padding: 76px 0; scroll-margin-top: 76px; }
       .hierarchy-item:nth-child(n) { margin-left: 0; }
@@ -421,7 +439,7 @@
       <span class="menu-text">Содержание</span>
     </button>
     <div class="topbar-title"><strong>Урок 01</strong> · Введение в LLM</div>
-    <div class="remaining" id="top-remaining">Осталось 18 разделов</div>
+    <div class="remaining" id="top-remaining">Остался 21 раздел</div>
     <button class="control theme-button" id="theme-toggle" type="button" aria-label="Переключить цветовую тему" aria-pressed="false">
       <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
       <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M20 15.2A8.2 8.2 0 0 1 8.8 4a8.2 8.2 0 1 0 11.2 11.2Z"/></svg>
@@ -438,34 +456,37 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
         </button>
       </div>
-      <div class="drawer-stats"><span id="drawer-percent">5% пройдено</span><span id="drawer-remaining">18 разделов осталось</span></div>
+      <div class="drawer-stats"><span id="drawer-percent">5% пройдено</span><span id="drawer-remaining">21 раздел остался</span></div>
       <div class="drawer-progress" aria-hidden="true"><span id="drawer-progress-bar"></span></div>
     </div>
     <nav class="drawer-nav" id="drawer-nav">
       <p class="nav-group">Картина в целом</p>
       <a class="drawer-link current" href="#overview" data-section-link><span class="drawer-number">01</span><span>Главная идея урока</span><span class="drawer-state"></span></a>
       <a class="drawer-link" href="#ai-map" data-section-link><span class="drawer-number">02</span><span>Карта искусственного интеллекта</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#capabilities" data-section-link><span class="drawer-number">03</span><span>Возможности и ограничения</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#nlp-tasks" data-section-link><span class="drawer-number">03</span><span>Задачи и системы NLP</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#capabilities" data-section-link><span class="drawer-number">04</span><span>Возможности и ограничения</span><span class="drawer-state"></span></a>
       <p class="nav-group">Как устроена LLM</p>
-      <a class="drawer-link" href="#language-model" data-section-link><span class="drawer-number">04</span><span>Языковое моделирование</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#tokens" data-section-link><span class="drawer-number">05</span><span>Токены и BPE</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#transformer" data-section-link><span class="drawer-number">06</span><span>Transformer и эмбеддинги</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#pretraining" data-section-link><span class="drawer-number">07</span><span>Предобучение</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#loss" data-section-link><span class="drawer-number">08</span><span>Кросс-энтропия</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#language-model" data-section-link><span class="drawer-number">05</span><span>Языковое моделирование</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#tokens" data-section-link><span class="drawer-number">06</span><span>Токены и BPE</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#transformer" data-section-link><span class="drawer-number">07</span><span>Transformer и эмбеддинги</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#pretraining" data-section-link><span class="drawer-number">08</span><span>Предобучение</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#loss" data-section-link><span class="drawer-number">09</span><span>Кросс-энтропия</span><span class="drawer-state"></span></a>
       <p class="nav-group">От модели к ассистенту</p>
-      <a class="drawer-link" href="#instruction" data-section-link><span class="drawer-number">09</span><span>Instruction tuning</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#prompting" data-section-link><span class="drawer-number">10</span><span>Хорошие промпты</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#reasoning" data-section-link><span class="drawer-number">11</span><span>Рассуждающие модели</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#instruction" data-section-link><span class="drawer-number">10</span><span>Instruction tuning</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#prompting" data-section-link><span class="drawer-number">11</span><span>Хорошие промпты</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#reasoning" data-section-link><span class="drawer-number">12</span><span>Рассуждающие модели</span><span class="drawer-state"></span></a>
       <p class="nav-group">Расширение возможностей</p>
-      <a class="drawer-link" href="#lora" data-section-link><span class="drawer-number">12</span><span>LoRA-адаптеры</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#rag" data-section-link><span class="drawer-number">13</span><span>RAG и внешние знания</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#choice" data-section-link><span class="drawer-number">14</span><span>Prompt, LoRA или RAG</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#lora" data-section-link><span class="drawer-number">13</span><span>LoRA-адаптеры</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#rag" data-section-link><span class="drawer-number">14</span><span>RAG и внешние знания</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#choice" data-section-link><span class="drawer-number">15</span><span>Prompt, LoRA или RAG</span><span class="drawer-state"></span></a>
       <p class="nav-group">Практика</p>
-      <a class="drawer-link" href="#solution" data-section-link><span class="drawer-number">15</span><span>Как проектировать LLM-решение</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#summary" data-section-link><span class="drawer-number">16</span><span>Итоги урока</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#glossary" data-section-link><span class="drawer-number">17</span><span>Словарь простыми словами</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#additions" data-section-link><span class="drawer-number">18</span><span>Дополнительные пояснения</span><span class="drawer-state"></span></a>
-      <a class="drawer-link" href="#quiz" data-section-link><span class="drawer-number">19</span><span>Тесты и задания</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#solution" data-section-link><span class="drawer-number">16</span><span>Как проектировать LLM-решение</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#metrics" data-section-link><span class="drawer-number">17</span><span>Accuracy, Precision и Recall</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#f1-averaging" data-section-link><span class="drawer-number">18</span><span>F1 и усреднение</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#summary" data-section-link><span class="drawer-number">19</span><span>Итоги урока</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#glossary" data-section-link><span class="drawer-number">20</span><span>Словарь простыми словами</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#additions" data-section-link><span class="drawer-number">21</span><span>Дополнительные пояснения</span><span class="drawer-state"></span></a>
+      <a class="drawer-link" href="#quiz" data-section-link><span class="drawer-number">22</span><span>Тесты и задания</span><span class="drawer-state"></span></a>
     </nav>
     <div class="drawer-foot">Текущая тема отмечена шоколадным цветом. К любой части можно вернуться в любой момент.</div>
   </aside>
@@ -474,11 +495,11 @@
     <section class="hero page reveal" id="overview" data-nav-section>
       <p class="eyebrow">Полный конспект · Урок 01</p>
       <h1>Введение в большие <em>языковые модели</em></h1>
-      <p class="hero-lead">Путь от простой задачи предсказания следующего токена до современных ассистентов с рассуждением, LoRA и RAG.</p>
+      <p class="hero-lead">Путь от задач NLP и предсказания следующего токена до современных ассистентов, RAG и осмысленной оценки качества.</p>
       <div class="hero-meta">
         <div class="meta-card"><strong>После урока</strong><span>Вы поймёте, что именно делает LLM и как она обучается.</span></div>
         <div class="meta-card"><strong>Практический результат</strong><span>Сможете выбирать между промптом, LoRA и RAG.</span></div>
-        <div class="meta-card"><strong>В конце</strong><span>15 проверяемых заданий разных типов и вопрос для самостоятельного объяснения.</span></div>
+        <div class="meta-card"><strong>В конце</strong><span>24 проверяемых задания разных типов и вопрос для самостоятельного объяснения.</span></div>
       </div>
     </section>
 
@@ -502,9 +523,36 @@
       </div>
     </section>
 
+    <section class="chapter page reveal" id="nlp-tasks" data-nav-section>
+      <div class="reading">
+        <p class="section-label">02 · Задачи NLP</p>
+        <h2>От отдельных задач к <em>целым интеллектуальным системам</em></h2>
+        <p class="lead"><strong>NLP</strong>, или обработка естественного языка, — область на стыке лингвистики и машинного обучения. Она учит компьютер извлекать смысл из человеческой речи и создавать новый текст.</p>
+        <div class="plain-language"><p class="mini-label">Если совсем просто</p><p>Не всякая NLP-модель является LLM. Простая модель может только определять тональность отзыва. LLM умеет решать сразу много языковых задач через один интерфейс — обычный текстовый запрос.</p><p class="example"><strong>Пример:</strong> фильтр спама — NLP-система, но не обязательно большая языковая модель. Современный ассистент может классифицировать письмо, кратко пересказать его и подготовить ответ.</p></div>
+
+        <div class="grid-2">
+          <article class="card"><p class="mini-label">Обучение с учителем</p><h3>Классификация</h3><p>Текст относят к заранее известному классу: «спам», «не спам», «позитивный», «негативный». Для обучения нужны примеры с правильными метками.</p></article>
+          <article class="card"><p class="mini-label">Обучение без учителя</p><h3>Кластеризация</h3><p>Готовых категорий нет. Алгоритм сам группирует похожие по смыслу документы, отзывы или запросы.</p></article>
+          <article class="card"><p class="mini-label">Метка для каждого фрагмента</p><h3>Sequence labeling</h3><p>Модель размечает последовательность: определяет части речи, имена людей, организации, адреса и другие сущности.</p></article>
+          <article class="card accent"><p class="mini-label">Текст → текст</p><h3>Seq2seq</h3><p>На входе и выходе находятся последовательности. Сюда относятся перевод, суммаризация, ответы на вопросы и парафраз.</p></article>
+        </div>
+
+        <h3 style="margin-top:38px">Современные NLP-системы объединяют несколько подходов</h3>
+        <ul class="clean-list">
+          <li><span class="num">01</span><span><strong>Семантический поиск</strong>Ищет документы по смыслу, даже если в них нет точных слов из запроса.</span></li>
+          <li><span class="num">02</span><span><strong>Чат-бот и ассистент</strong>Чат-бот ведёт диалог; ассистент дополнительно работает с документами, кодом, инструментами и внешними сервисами.</span></li>
+          <li><span class="num">03</span><span><strong>Мультимодальная модель</strong>Понимает несколько типов данных: например, текст и изображение или текст и аудио.</span></li>
+          <li><span class="num">04</span><span><strong>Омнимодальная модель</strong>Стремится объединить текст, изображения, аудио, видео и другие модальности в одной архитектуре.</span></li>
+          <li><span class="num">05</span><span><strong>AI-агент</strong>Получает цель, планирует действия, вызывает инструменты, наблюдает результат и при необходимости меняет следующий шаг.</span></li>
+        </ul>
+        <div class="callout"><strong>Чат-бот и агент — не одно и то же.</strong> Чат-бот прежде всего отвечает. Агент может действовать: искать данные, запускать код или обращаться к сервису. Для реальной автономности нужны внешние инструменты, правила доступа и контроль ошибок.</div>
+        <p class="source-note">Материал раздела адаптирован по подразделам 2.1–2.3 курса Stepik <a href="https://stepik.org/course/243156" target="_blank" rel="noopener">«Внутри LLM: как думает ChatGPT?»</a>. Формулировки и схема переработаны для этого конспекта.</p>
+      </div>
+    </section>
+
     <section class="chapter page reveal" id="capabilities" data-nav-section>
       <div class="reading">
-        <p class="section-label">02 · Польза и границы</p>
+        <p class="section-label">03 · Польза и границы</p>
         <h2>Почему LLM стала <em>универсальным инструментом</em></h2>
         <p class="lead">Через язык хранятся знания, формулируются задачи и передаются инструкции. Поэтому работа с текстом открывает доступ ко множеству интеллектуальных процессов.</p>
         <div class="plain-language"><p class="mini-label">Новый термин · Галлюцинация</p><p><strong>Галлюцинация LLM</strong> — правдоподобный, но неверный или выдуманный ответ. Модель не «врёт намеренно»: она продолжает текст так, как статистически похоже на хороший ответ.</p><p class="example"><strong>Пример:</strong> модель может придумать название научной статьи и даже оформить несуществующую ссылку. Поэтому факты, даты и источники нужно проверять.</p></div>
@@ -523,11 +571,24 @@
 
     <section class="chapter page reveal" id="language-model" data-nav-section>
       <div class="reading">
-        <p class="section-label">03 · Базовая задача</p>
+        <p class="section-label">04 · Базовая задача</p>
         <h2>Языковая модель предсказывает <em>следующий токен</em></h2>
         <p class="lead">По уже известному контексту модель строит распределение вероятностей для следующего элемента последовательности.</p>
         <div class="plain-language"><p class="mini-label">Если совсем просто</p><p>Представьте очень мощную функцию автодополнения. Она смотрит на уже написанное и оценивает, какое продолжение подходит лучше. После выбора одного кусочка текста весь процесс повторяется.</p><p class="example"><strong>Пример:</strong> после фразы «Зимой идёт…» слово «снег» получит высокую вероятность, но модель всё равно может выбрать другое подходящее продолжение.</p></div>
         <div class="formula">P(t<sub>n</sub> | t<sub>1</sub>, t<sub>2</sub>, …, t<sub>n−1</sub>)</div>
+        <div class="probability-demo" aria-label="Пример распределения вероятностей следующего токена">
+          <p class="mini-label">Собственная схема по мотивам примера Stepik</p>
+          <div class="probability-prompt">«Сегодня на улице…»</div>
+          <div class="probability-row"><span class="probability-token">тепло</span><span class="probability-value">50%</span><span class="probability-track"><span style="width:50%"></span></span></div>
+          <div class="probability-row"><span class="probability-token">солнечно</span><span class="probability-value">25%</span><span class="probability-track"><span style="width:25%"></span></span></div>
+          <div class="probability-row"><span class="probability-token">холодно</span><span class="probability-value">15%</span><span class="probability-track"><span style="width:15%"></span></span></div>
+          <div class="probability-row"><span class="probability-token">тихо</span><span class="probability-value">10%</span><span class="probability-track"><span style="width:10%"></span></span></div>
+        </div>
+        <div class="grid-2">
+          <article class="card"><h3>Greedy decoding</h3><p>Всегда выбирается самый вероятный токен. В примере это будет «тепло». Результат более предсказуем, но иногда однообразен.</p></article>
+          <article class="card accent"><h3>Sampling</h3><p>Токен случайно выбирается с учётом вероятностей. «Тепло» выпадет чаще, но заранее гарантировать конкретное слово нельзя.</p></article>
+        </div>
+        <div class="callout"><strong>Temperature</strong> меняет форму распределения: низкая температура делает выбор осторожнее и предсказуемее, высокая увеличивает разнообразие и риск странных продолжений.</div>
         <div class="pipeline">
           <div class="pipeline-step"><span class="step-number">01</span><strong>Контекст</strong><p>Запрос пользователя и уже сгенерированный текст.</p></div>
           <div class="pipeline-step"><span class="step-number">02</span><strong>Вероятности</strong><p>Оценка каждого элемента словаря как продолжения.</p></div>
@@ -544,7 +605,7 @@
 
     <section class="chapter page reveal" id="tokens" data-nav-section>
       <div class="reading">
-        <p class="section-label">04 · Единицы текста</p>
+        <p class="section-label">05 · Единицы текста</p>
         <h2>Токен — это не обязательно <em>слово</em></h2>
         <p class="lead">Текст сначала делится на элементы фиксированного словаря. Токеном может быть слово, часть слова, знак или пробел.</p>
         <div class="plain-language"><p class="mini-label">Если совсем просто</p><p>Токены похожи на детали конструктора, из которых модель собирает текст. Частые слова могут быть одной деталью, а редкие — несколькими.</p><p class="example"><strong>Условный пример:</strong> «нейросеть» может разделиться как «нейро» + «сеть», а точка или пробел — стать отдельным токеном. Реальное разбиение зависит от конкретного токенизатора.</p></div>
@@ -563,7 +624,7 @@
 
     <section class="chapter page reveal" id="transformer" data-nav-section>
       <div class="reading">
-        <p class="section-label">05 · Архитектура</p>
+        <p class="section-label">06 · Архитектура</p>
         <h2>Путь текста через <em>Transformer</em></h2>
         <p class="lead">Большинство современных LLM построены на архитектуре Transformer. GPT расшифровывается как Generative Pre-trained Transformer.</p>
         <div class="plain-language"><p class="mini-label">Три термина без формул</p><p><strong>Эмбеддинг</strong> — набор чисел, представляющий смысл и свойства токена. <strong>Attention</strong> — механизм, который помогает определить, на какие части контекста сейчас важнее смотреть. <strong>Transformer</strong> — архитектура, многократно применяющая такие преобразования.</p><p class="example"><strong>Пример attention:</strong> в предложении «Анна положила книгу на стол, потому что она была тяжёлой» модели нужно понять, к чему относится «она». Связи с соседними словами помогают выбрать наиболее вероятный смысл.</p></div>
@@ -579,7 +640,7 @@
 
     <section class="chapter page reveal" id="pretraining" data-nav-section>
       <div class="reading">
-        <p class="section-label">06 · Предобучение</p>
+        <p class="section-label">07 · Предобучение</p>
         <h2>Откуда модель получает <em>языковые закономерности</em></h2>
         <p class="lead">Предобучение следует общей схеме машинного обучения: прогноз, сравнение с правильным ответом и корректировка параметров.</p>
         <div class="plain-language"><p class="mini-label">Если совсем просто</p><p>Предобучение похоже на миллиарды упражнений «угадай продолжение». После каждой ошибки система совсем немного меняет внутренние числовые настройки — <strong>веса</strong>.</p><p class="example"><strong>Термины:</strong> <strong>корпус</strong> — большая коллекция текстов; <strong>батч</strong> — небольшая порция примеров, обрабатываемая за один шаг; <strong>веса</strong> — обучаемые числа, определяющие поведение сети.</p></div>
@@ -596,7 +657,7 @@
 
     <section class="chapter page reveal" id="loss" data-nav-section>
       <div class="reading">
-        <p class="section-label">07 · Функция потерь</p>
+        <p class="section-label">08 · Функция потерь</p>
         <h2>Кросс-энтропия <em>простыми словами</em></h2>
         <p class="lead">Предсказание токена можно рассматривать как классификацию по всем элементам словаря. Функция потерь измеряет, насколько модель ошиблась.</p>
         <div class="plain-language"><p class="mini-label">Аналогия с экзаменом</p><p>Мало просто ошибиться — важно, насколько модель была уверена. Если правильному ответу она дала 90%, штраф небольшой. Если дала 0,01% и уверенно выбрала другое, штраф намного больше.</p><p class="example"><strong>Функция потерь</strong> превращает качество ответа в одно число. Обучение старается постепенно уменьшать это число.</p></div>
@@ -611,7 +672,7 @@
 
     <section class="chapter page reveal" id="instruction" data-nav-section>
       <div class="reading">
-        <p class="section-label">08 · Следование инструкциям</p>
+        <p class="section-label">09 · Следование инструкциям</p>
         <h2>Почему базовую модель нужно превратить в <em>ассистента</em></h2>
         <p class="lead">После предобучения модель умеет продолжать текст, но ещё не обязана понимать формат «вопрос пользователя — полезный ответ».</p>
         <div class="plain-language"><p class="mini-label">Если совсем просто</p><p><strong>Base model</strong> знает, как обычно продолжаются тексты. <strong>Instruction tuning</strong> дополнительно показывает ей, что после запроса пользователя ожидается полезный ответ определённого формата.</p><p class="example"><strong>Пример:</strong> на «Назови столицу Франции» базовая модель может продолжить список похожих вопросов, а instruct-модель скорее ответит «Париж».</p></div>
@@ -620,13 +681,14 @@
           <article class="card accent"><p class="mini-label">Instruct model</p><h3>Следует намерению</h3><p>Дополнительно обучена на примерах инструкций и правильных ответов.</p></article>
         </div>
         <p>Instruction tuning обычно выполняют на датасете пар «запрос — желаемый ответ». Позже модель также настраивают на вежливость, безопасность и предпочтительный стиль поведения.</p>
+        <div class="callout"><strong>Fine-tuning</strong> — общее название дообучения уже предобученной модели на новой задаче или специализированном наборе данных. Instruction tuning — один из видов fine-tuning, сфокусированный на выполнении инструкций.</div>
         <div class="callout"><strong>Важно.</strong> Вежливость, отказ от отдельных тем и другие правила поведения — не случайный баг, а результат дополнительной настройки модели и внешних механизмов безопасности.</div>
       </div>
     </section>
 
     <section class="chapter page reveal" id="prompting" data-nav-section>
       <div class="reading">
-        <p class="section-label">09 · Работа пользователя</p>
+        <p class="section-label">10 · Работа пользователя</p>
         <h2>Семь правил <em>хорошего промпта</em></h2>
         <p class="lead">Промпт — самый дешёвый и быстрый рычаг улучшения результата. «Какой вопрос, такой и ответ» здесь работает буквально.</p>
         <div class="plain-language"><p class="mini-label">Шаблон, который можно копировать</p><p><strong>Роль:</strong> кто отвечает. <strong>Задача:</strong> что нужно сделать. <strong>Контекст:</strong> исходные данные. <strong>Формат:</strong> как оформить результат. <strong>Критерии:</strong> что считать хорошим ответом.</p><p class="example"><strong>Пример:</strong> «Ты редактор учебных текстов. Объясни токенизацию новичку в 5 предложениях, без формул, с одной бытовой аналогией и мини-проверкой в конце».</p></div>
@@ -645,7 +707,7 @@
 
     <section class="chapter page reveal" id="reasoning" data-nav-section>
       <div class="reading">
-        <p class="section-label">10 · Рассуждение</p>
+        <p class="section-label">11 · Рассуждение</p>
         <h2>Зачем модели нужен <em>thinking-режим</em></h2>
         <p class="lead">Для сложной логики и математики полезно строить решение по этапам, а не сразу угадывать итоговый ответ.</p>
         <div class="plain-language"><p class="mini-label">Когда это полезно</p><p>Режим рассуждения даёт модели больше вычислений на промежуточные проверки. Он полезен, когда шаги зависят друг от друга; для простого вопроса это часто лишнее.</p><p class="example"><strong>Пример:</strong> «Какой сегодня день недели?» — обычно простой запрос. Задача с несколькими условиями, исключениями и расчётами — хороший кандидат для thinking-режима.</p></div>
@@ -660,7 +722,7 @@
 
     <section class="chapter page reveal" id="lora" data-nav-section>
       <div class="reading">
-        <p class="section-label">11 · Лёгкое дообучение</p>
+        <p class="section-label">12 · Лёгкое дообучение</p>
         <h2>LoRA меняет поведение, не переобучая <em>всю модель</em></h2>
         <p class="lead">Полное дообучение огромной LLM требует слишком много ресурсов. LoRA добавляет небольшие обучаемые низкоранговые матрицы к уже существующим весам.</p>
         <div class="plain-language"><p class="mini-label">Если совсем просто</p><p>Вместо изменения миллиардов параметров LoRA обучает небольшую «насадку» к модели. Её легче хранить, менять и обучать, чем полную копию LLM.</p><p class="example"><strong>Пример:</strong> одна и та же базовая модель может подключать отдельный адаптер для юридического стиля и другой — для диалогов персонажа. При этом адаптер не становится автоматически свежей энциклопедией фактов.</p></div>
@@ -676,7 +738,7 @@
 
     <section class="chapter page reveal" id="rag" data-nav-section>
       <div class="reading">
-        <p class="section-label">12 · Внешние знания</p>
+        <p class="section-label">13 · Внешние знания</p>
         <h2>RAG позволяет модели <em>сначала найти, потом ответить</em></h2>
         <p class="lead">Retrieval-Augmented Generation подключает внешний поиск или базу знаний. Модели не нужно помнить всё внутри весов.</p>
         <div class="plain-language"><p class="mini-label">Аналогия с экзаменом</p><p>Обычная LLM отвечает «по памяти». RAG сначала выдаёт ей нужные страницы из разрешённой шпаргалки, а уже затем просит составить ответ.</p><p class="example"><strong>Новый термин · retrieval:</strong> поиск подходящих фрагментов. Обычно документы заранее делят на небольшие части, а система выбирает те, которые ближе всего к вопросу по смыслу.</p></div>
@@ -696,7 +758,7 @@
 
     <section class="chapter page reveal" id="choice" data-nav-section>
       <div class="reading">
-        <p class="section-label">13 · Выбор метода</p>
+        <p class="section-label">14 · Выбор метода</p>
         <h2>Prompt, LoRA или RAG: <em>что использовать</em></h2>
         <p class="lead">Сначала применяют самый лёгкий инструмент. Усложнение оправдано только тогда, когда простой подход не решает задачу.</p>
         <div class="plain-language"><p class="mini-label">Правило одного вопроса</p><p>Спросите: <strong>чего именно не хватает?</strong> Хорошего указания — улучшайте prompt. Устойчивого навыка или стиля — рассматривайте LoRA. Свежих или внутренних фактов — подключайте RAG.</p><p class="example"><strong>Комбинация:</strong> помощник техподдержки может получать стиль общения через prompt или LoRA, а инструкции по текущим продуктам — через RAG.</p></div>
@@ -716,7 +778,7 @@
 
     <section class="chapter page reveal" id="solution" data-nav-section>
       <div class="reading">
-        <p class="section-label">14 · Проектирование решения</p>
+        <p class="section-label">15 · Проектирование решения</p>
         <h2>Не каждой задаче <em>нужна LLM</em></h2>
         <p class="lead">Первый шаг — проверка здравого смысла. Иногда регулярное выражение, обычный поиск, классификатор или небольшой скрипт решат задачу быстрее и надёжнее.</p>
         <div class="plain-language"><p class="mini-label">Практическое правило</p><p>Если задача имеет точные, неизменные правила, обычный код часто надёжнее. LLM особенно полезна там, где формулировки разнообразны, смысл неоднозначен или нужно создать новый текст.</p><p class="example"><strong>Пример:</strong> проверить формат номера телефона лучше регулярным выражением. Понять смысл свободного отзыва клиента — подходящая задача для языковой модели.</p></div>
@@ -736,9 +798,67 @@
       </div>
     </section>
 
+    <section class="chapter page reveal" id="metrics" data-nav-section>
+      <div class="reading">
+        <p class="section-label">16 · Оценка качества</p>
+        <h2>Accuracy, Precision и Recall: <em>что именно измерять</em></h2>
+        <p class="lead">Метрика превращает качество системы в число. Без неё легко принять убедительный пример за реальное улучшение модели.</p>
+        <div class="plain-language"><p class="mini-label">Почему одной метрики недостаточно</p><p>Метрику выбирают под задачу и цену разных ошибок. Для регрессии часто используют MAE или RMSE, для сравнения с эталонным текстом — BLEU или ROUGE, а для классификации — Accuracy, Precision, Recall и F1.</p><p class="example"><strong>Главный вопрос:</strong> какая ошибка опаснее именно здесь — ложная тревога или пропущенный нужный объект?</p></div>
+
+        <h3 style="margin-top:38px">Четыре исхода бинарной классификации</h3>
+        <div style="overflow-x:auto">
+          <table class="compare">
+            <thead><tr><th></th><th>Предсказано: Positive</th><th>Предсказано: Negative</th></tr></thead>
+            <tbody>
+              <tr><td>Факт: Positive</td><td><strong>TP = 40</strong><br>Нашли положительный объект</td><td><strong>FN = 10</strong><br>Пропустили положительный объект</td></tr>
+              <tr><td>Факт: Negative</td><td><strong>FP = 20</strong><br>Ложная тревога</td><td><strong>TN = 30</strong><br>Верно отклонили объект</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="metric-formulas">
+          <article class="metric-formula"><strong>Accuracy · общая доля верных</strong><div class="metric-expression">(TP + TN) / все примеры</div><p>Хороша, когда классы и цена ошибок достаточно сбалансированы.</p></article>
+          <article class="metric-formula"><strong>Precision · точность</strong><div class="metric-expression">TP / (TP + FP)</div><p>Из всего найденного положительного сколько действительно было положительным?</p></article>
+          <article class="metric-formula"><strong>Recall · полнота</strong><div class="metric-expression">TP / (TP + FN)</div><p>Из всех настоящих положительных объектов какую долю удалось найти?</p></article>
+          <article class="metric-formula"><strong>F1 · баланс</strong><div class="metric-expression">2 × Precision × Recall / (Precision + Recall)</div><p>Среднее гармоническое: низкое значение одной из метрик заметно снижает итог.</p></article>
+        </div>
+
+        <div class="callout"><strong>Ловушка Accuracy.</strong> В наборе 950 обычных и 50 редких объектов модель может всегда отвечать «обычный» и получить 95% Accuracy, не найдя ни одного редкого объекта. Это называется <strong>дисбалансом классов</strong>.</div>
+        <div class="grid-2">
+          <article class="card success"><h3>Когда важнее Recall</h3><p>Пропуск дорог. Например, при поиске персональных данных, редкого заболевания или мошеннической операции желательно найти как можно больше реальных случаев.</p></article>
+          <article class="card warning"><h3>Когда важнее Precision</h3><p>Ложная тревога дорогая. Например, важное письмо нельзя часто отправлять в спам: лучше пропустить немного спама, чем потерять деловую переписку.</p></article>
+        </div>
+        <div class="plain-language"><p class="mini-label">Мнемоника</p><p><strong>Precision:</strong> «Могу ли я доверять тому, что модель нашла?» <strong>Recall:</strong> «Не пропустила ли модель нужные объекты?»</p><p class="example"><strong>По таблице выше:</strong> Precision = 40 / 60 ≈ 0,67; Recall = 40 / 50 = 0,80.</p></div>
+        <p class="source-note">Раздел адаптирован по уроку 2.4 курса Stepik <a href="https://stepik.org/lesson/2422690?unit=2459477" target="_blank" rel="noopener">«Метрики качества моделей»</a>. Примеры переформулированы и дополнены пояснениями.</p>
+      </div>
+    </section>
+
+    <section class="chapter page reveal" id="f1-averaging" data-nav-section>
+      <div class="reading">
+        <p class="section-label">17 · F1 и несколько классов</p>
+        <h2>Как объединить Precision и Recall <em>в одну оценку</em></h2>
+        <p class="lead">F1 полезна, когда обе ошибки важны. Среднее гармоническое не позволяет очень высокому Precision полностью скрыть низкий Recall — и наоборот.</p>
+        <div class="formula">F1 = 2 × (Precision × Recall) / (Precision + Recall)</div>
+        <div class="grid-2">
+          <article class="card"><h3>Пример</h3><p>Если Precision = 0,80, а Recall = 0,60, то F1 ≈ 0,686.</p></article>
+          <article class="card warning"><h3>Почему не обычное среднее</h3><p>При Precision = 0,95 и Recall = 0,30 арифметическое среднее выглядит неплохо, но F1 ≈ 0,46 подчёркивает сильный перекос.</p></article>
+        </div>
+
+        <h3 style="margin-top:38px">Если классов больше двух</h3>
+        <p>Сначала Precision, Recall и F1 можно посчитать отдельно для каждого класса. Затем результаты объединяют одним из трёх способов.</p>
+        <div class="grid-3">
+          <article class="card accent"><p class="mini-label">macro</p><h3>Каждый класс равноправен</h3><p>Простое среднее F1 по классам. Хорошо показывает провал на редком классе, даже если он почти не влияет на общий объём.</p></article>
+          <article class="card"><p class="mini-label">weighted</p><h3>Учитывается размер класса</h3><p>F1 каждого класса умножается на его долю. Частые классы сильнее влияют на результат.</p></article>
+          <article class="card"><p class="mini-label">micro</p><h3>Сначала суммируются ошибки</h3><p>TP, FP и FN объединяются по всем классам, после чего вычисляется одна метрика по всем объектам.</p></article>
+        </div>
+        <div class="callout"><strong>Как выбирать.</strong> Смотрите <code>macro</code>, если критично не потерять редкие классы; <code>weighted</code> — если нужна оценка с учётом реального распределения; <code>micro</code> — для общей производительности по всем отдельным предсказаниям. Полезно показывать несколько метрик вместе.</div>
+        <blockquote class="quote">Метрика — это не универсальная истина, а формализованный приоритет продукта. Сначала определите цену FP и FN, затем выбирайте число для оптимизации.</blockquote>
+      </div>
+    </section>
+
     <section class="chapter page reveal" id="summary" data-nav-section>
       <div class="reading">
-        <p class="section-label">15 · Итоги лекции</p>
+        <p class="section-label">18 · Итоги лекции</p>
         <h2>Весь путь LLM <em>на одной странице</em></h2>
         <div class="pipeline">
           <div class="pipeline-step"><span class="step-number">01</span><strong>Language model</strong><p>Предсказывает следующий токен.</p></div>
@@ -747,7 +867,7 @@
           <div class="pipeline-step"><span class="step-number">04</span><strong>Расширение</strong><p>Рассуждение, LoRA, RAG и инструменты.</p></div>
         </div>
         <div class="grid-2">
-          <article class="card accent"><h3>Что запомнить</h3><ul><li>Текст разбивается на токены.</li><li>Transformer учитывает контекст.</li><li>Предобучение уменьшает ошибку следующего токена.</li><li>Instruction tuning создаёт полезного ассистента.</li></ul></article>
+          <article class="card accent"><h3>Что запомнить</h3><ul><li>NLP включает классификацию, кластеризацию, seq2seq и составные системы.</li><li>Текст разбивается на токены, а Transformer учитывает контекст.</li><li>Предобучение уменьшает ошибку следующего токена.</li><li>Instruction tuning создаёт полезного ассистента.</li><li>Качество оценивают метриками, выбранными под цену конкретных ошибок.</li></ul></article>
           <article class="card warning"><h3>Чему не доверять слепо</h3><ul><li>Фактам без источников.</li><li>Арифметике без калькулятора.</li><li>Коду без запуска и проверки.</li><li>Ограничениям безопасности только через промпт.</li></ul></article>
         </div>
       </div>
@@ -755,11 +875,19 @@
 
     <section class="chapter page reveal" id="glossary" data-nav-section>
       <div class="reading">
-        <p class="section-label">16 · Словарь урока</p>
+        <p class="section-label">19 · Словарь урока</p>
         <h2>Термины <em>простыми словами</em></h2>
         <p class="lead">Короткие определения без лишней математики. К этому разделу удобно возвращаться во время повторения.</p>
         <dl class="term-grid">
           <div class="term-item"><dt>LLM</dt><dd>Большая языковая модель: нейросеть, обученная работать с текстом и предсказывать его продолжение.</dd></div>
+          <div class="term-item"><dt>NLP</dt><dd>Обработка естественного языка: методы, которые помогают компьютеру анализировать и создавать человеческую речь.</dd></div>
+          <div class="term-item"><dt>Классификация</dt><dd>Отнесение текста к одному или нескольким заранее известным классам.</dd></div>
+          <div class="term-item"><dt>Кластеризация</dt><dd>Автоматическая группировка похожих текстов без заранее заданных категорий.</dd></div>
+          <div class="term-item"><dt>Seq2seq</dt><dd>Класс задач «последовательность → последовательность»: перевод, суммаризация, парафраз и генерация ответа.</dd></div>
+          <div class="term-item"><dt>Модальность</dt><dd>Тип данных: текст, изображение, звук, видео и так далее.</dd></div>
+          <div class="term-item"><dt>Мультимодальная модель</dt><dd>Модель, способная совместно работать с несколькими типами данных.</dd></div>
+          <div class="term-item"><dt>Омнимодальная модель</dt><dd>Модель, стремящаяся поддерживать множество модальностей в единой архитектуре.</dd></div>
+          <div class="term-item"><dt>AI-агент</dt><dd>Система, которая получает цель, планирует шаги и вызывает инструменты для выполнения действий.</dd></div>
           <div class="term-item"><dt>Токен</dt><dd>Небольшой фрагмент текста: слово, часть слова, знак или даже пробел.</dd></div>
           <div class="term-item"><dt>Токенизация</dt><dd>Разделение текста на токены и замена каждого токена числовым ID.</dd></div>
           <div class="term-item"><dt>Словарь модели</dt><dd>Фиксированный набор токенов, которые модель умеет распознавать и генерировать.</dd></div>
@@ -775,12 +903,24 @@
           <div class="term-item"><dt>Кросс-энтропия</dt><dd>Распространённая функция потерь, которая особенно сильно штрафует уверенность в неправильном ответе.</dd></div>
           <div class="term-item"><dt>Инференс</dt><dd>Обычное использование уже обученной модели для получения ответа; основные веса в этот момент не обучаются.</dd></div>
           <div class="term-item"><dt>Instruction tuning</dt><dd>Дообучение на примерах «запрос — хороший ответ», превращающее продолжатель текста в ассистента.</dd></div>
+          <div class="term-item"><dt>Fine-tuning</dt><dd>Продолжение обучения готовой модели на специализированной задаче или новом наборе данных.</dd></div>
+          <div class="term-item"><dt>Greedy decoding</dt><dd>Стратегия генерации, которая на каждом шаге берёт самый вероятный токен.</dd></div>
+          <div class="term-item"><dt>Sampling</dt><dd>Случайный выбор токена с учётом распределения вероятностей.</dd></div>
+          <div class="term-item"><dt>Temperature</dt><dd>Настройка разнообразия генерации: ниже — предсказуемее, выше — разнообразнее и рискованнее.</dd></div>
           <div class="term-item"><dt>LoRA</dt><dd>Небольшой обучаемый адаптер, меняющий навык или стиль модели без полного переобучения всех весов.</dd></div>
           <div class="term-item"><dt>RAG</dt><dd>Схема «найти документы → добавить их в контекст → сгенерировать ответ».</dd></div>
           <div class="term-item"><dt>Галлюцинация</dt><dd>Убедительно сформулированный, но неверный или выдуманный ответ модели.</dd></div>
           <div class="term-item"><dt>Квантизация</dt><dd>Уменьшение точности хранения весов ради снижения расхода памяти и ускорения запуска, иногда с небольшой потерей качества.</dd></div>
           <div class="term-item"><dt>Пайплайн</dt><dd>Последовательность этапов всей системы: например, принять вопрос, найти документы, вызвать LLM и проверить ответ.</dd></div>
           <div class="term-item"><dt>GPU</dt><dd>Процессор, хорошо выполняющий множество параллельных вычислений; часто используется для обучения и запуска LLM.</dd></div>
+          <div class="term-item"><dt>Дисбаланс классов</dt><dd>Ситуация, когда примеров одних классов намного больше, чем других.</dd></div>
+          <div class="term-item"><dt>Confusion matrix</dt><dd>Таблица, показывающая правильные ответы и ошибки каждого типа: TP, TN, FP и FN.</dd></div>
+          <div class="term-item"><dt>Precision</dt><dd>Доля правильных положительных ответов среди всего, что модель назвала положительным.</dd></div>
+          <div class="term-item"><dt>Recall</dt><dd>Доля найденных положительных объектов среди всех реально положительных.</dd></div>
+          <div class="term-item"><dt>F1-score</dt><dd>Среднее гармоническое Precision и Recall, подчёркивающее дисбаланс между ними.</dd></div>
+          <div class="term-item"><dt>Macro F1</dt><dd>Среднее F1 по классам, где каждый класс имеет одинаковый вес.</dd></div>
+          <div class="term-item"><dt>Weighted F1</dt><dd>Среднее F1 по классам с учётом количества объектов каждого класса.</dd></div>
+          <div class="term-item"><dt>Micro F1</dt><dd>F1 после суммирования TP, FP и FN по всем классам.</dd></div>
         </dl>
       </div>
     </section>
@@ -810,7 +950,7 @@
       <div class="reading">
         <p class="section-label">Закрепление</p>
         <h2>Проверьте, как вы <em>поняли урок</em></h2>
-        <p class="lead">15 проверяемых заданий: один и несколько ответов, сопоставление, свободный ввод, порядок шагов и практические ситуации. После проверки каждое задание покажет простое объяснение.</p>
+        <p class="lead">24 проверяемых задания: один и несколько ответов, сопоставление, свободный ввод, порядок шагов и практические ситуации. После проверки каждое задание покажет простое объяснение.</p>
         <form id="quiz-form" novalidate>
           <section class="quiz-question" data-question="q1">
             <span class="question-number">Задание 01 · Один вариант</span>
@@ -993,8 +1133,124 @@
             <div class="feedback" aria-live="polite"></div>
           </section>
 
+          <section class="quiz-question" data-question="q16">
+            <span class="question-number">Задание 16 · Практическая ситуация</span>
+            <h3>Отзывы нужно разделить на смысловые группы, но готовых категорий нет. Какая это задача?</h3>
+            <div class="options">
+              <label class="option"><input type="radio" name="q16" value="classification"> Классификация</label>
+              <label class="option"><input type="radio" name="q16" value="clustering"> Кластеризация</label>
+              <label class="option"><input type="radio" name="q16" value="translation"> Машинный перевод</label>
+              <label class="option"><input type="radio" name="q16" value="rag"> RAG</label>
+            </div>
+            <div class="feedback" aria-live="polite"></div>
+          </section>
+
+          <section class="quiz-question" data-question="q17">
+            <span class="question-number">Задание 17 · Несколько вариантов</span>
+            <h3>Какие задачи относятся к схеме seq2seq?</h3>
+            <div class="options">
+              <label class="option"><input type="checkbox" name="q17" value="translation"> Перевод текста</label>
+              <label class="option"><input type="checkbox" name="q17" value="summary"> Суммаризация документа</label>
+              <label class="option"><input type="checkbox" name="q17" value="paraphrase"> Перефразирование</label>
+              <label class="option"><input type="checkbox" name="q17" value="spam"> Присвоение метки «спам / не спам»</label>
+            </div>
+            <div class="feedback" aria-live="polite"></div>
+          </section>
+
+          <section class="quiz-question" data-question="q18">
+            <span class="question-number">Задание 18 · Сопоставление</span>
+            <h3>Сопоставьте систему с её основной особенностью</h3>
+            <div class="match-grid">
+              <label for="match-multimodal">Работает одновременно с текстом и изображениями</label>
+              <select id="match-multimodal" name="match-multimodal"><option value="">Выберите</option><option value="multimodal">Мультимодальная модель</option><option value="agent">AI-агент</option><option value="search">Семантический поиск</option></select>
+              <label for="match-agent">Планирует действия и вызывает инструменты</label>
+              <select id="match-agent" name="match-agent"><option value="">Выберите</option><option value="multimodal">Мультимодальная модель</option><option value="agent">AI-агент</option><option value="search">Семантический поиск</option></select>
+              <label for="match-search">Находит документы с похожим смыслом</label>
+              <select id="match-search" name="match-search"><option value="">Выберите</option><option value="multimodal">Мультимодальная модель</option><option value="agent">AI-агент</option><option value="search">Семантический поиск</option></select>
+            </div>
+            <div class="feedback" aria-live="polite"></div>
+          </section>
+
+          <section class="quiz-question" data-question="q19">
+            <span class="question-number">Задание 19 · Один вариант</span>
+            <h3>Что верно для sampling при генерации следующего токена?</h3>
+            <div class="options">
+              <label class="option"><input type="radio" name="q19" value="top"> Всегда выбирается только самый вероятный токен</label>
+              <label class="option"><input type="radio" name="q19" value="random"> Токен выбирается случайно с учётом распределения вероятностей</label>
+              <label class="option"><input type="radio" name="q19" value="fixed"> Все токены получают одинаковую вероятность</label>
+              <label class="option"><input type="radio" name="q19" value="search"> Модель сначала ищет слово в интернете</label>
+            </div>
+            <div class="feedback" aria-live="polite"></div>
+          </section>
+
+          <section class="quiz-question" data-question="q20">
+            <span class="question-number">Задание 20 · Один вариант</span>
+            <h3>Что такое fine-tuning?</h3>
+            <div class="options">
+              <label class="option"><input type="radio" name="q20" value="from-scratch"> Обучение новой модели с нуля</label>
+              <label class="option"><input type="radio" name="q20" value="continue"> Дообучение готовой модели на новой задаче или датасете</label>
+              <label class="option"><input type="radio" name="q20" value="prompt"> Только изменение текста промпта</label>
+              <label class="option"><input type="radio" name="q20" value="compress"> Только сжатие весов модели</label>
+            </div>
+            <div class="feedback" aria-live="polite"></div>
+          </section>
+
+          <section class="quiz-question" data-question="q21">
+            <span class="question-number">Задание 21 · Сопоставление</span>
+            <h3>Сопоставьте метрику с вопросом, на который она отвечает</h3>
+            <div class="match-grid">
+              <label for="match-accuracy">Какая доля всех ответов верна?</label>
+              <select id="match-accuracy" name="match-accuracy"><option value="">Выберите</option><option value="accuracy">Accuracy</option><option value="precision">Precision</option><option value="recall">Recall</option><option value="f1">F1</option></select>
+              <label for="match-precision">Можно ли доверять найденным положительным объектам?</label>
+              <select id="match-precision" name="match-precision"><option value="">Выберите</option><option value="accuracy">Accuracy</option><option value="precision">Precision</option><option value="recall">Recall</option><option value="f1">F1</option></select>
+              <label for="match-recall">Какую долю реальных положительных объектов мы нашли?</label>
+              <select id="match-recall" name="match-recall"><option value="">Выберите</option><option value="accuracy">Accuracy</option><option value="precision">Precision</option><option value="recall">Recall</option><option value="f1">F1</option></select>
+              <label for="match-f1">Как оценить баланс точности и полноты?</label>
+              <select id="match-f1" name="match-f1"><option value="">Выберите</option><option value="accuracy">Accuracy</option><option value="precision">Precision</option><option value="recall">Recall</option><option value="f1">F1</option></select>
+            </div>
+            <div class="feedback" aria-live="polite"></div>
+          </section>
+
+          <section class="quiz-question" data-question="q22">
+            <span class="question-number">Задание 22 · Расчёт без калькулятора</span>
+            <h3>В данных 950 объектов класса A и 50 класса B. Модель всегда отвечает A. Чему равна Accuracy?</h3>
+            <div class="options">
+              <label class="option"><input type="radio" name="q22" value="5"> 5%</label>
+              <label class="option"><input type="radio" name="q22" value="50"> 50%</label>
+              <label class="option"><input type="radio" name="q22" value="95"> 95%</label>
+              <label class="option"><input type="radio" name="q22" value="100"> 100%</label>
+            </div>
+            <div class="feedback" aria-live="polite"></div>
+          </section>
+
+          <section class="quiz-question" data-question="q23">
+            <span class="question-number">Задание 23 · Практическая ситуация</span>
+            <h3>В спам-фильтре потеря важного письма намного дороже пропущенного спама. Что приоритетнее?</h3>
+            <div class="options">
+              <label class="option"><input type="radio" name="q23" value="precision"> Высокий Precision класса «спам»</label>
+              <label class="option"><input type="radio" name="q23" value="recall"> Максимальный Recall класса «спам» любой ценой</label>
+              <label class="option"><input type="radio" name="q23" value="accuracy"> Только Accuracy</label>
+              <label class="option"><input type="radio" name="q23" value="random"> Случайный выбор</label>
+            </div>
+            <div class="feedback" aria-live="polite"></div>
+          </section>
+
+          <section class="quiz-question" data-question="q24">
+            <span class="question-number">Задание 24 · Сопоставление</span>
+            <h3>Какой способ усреднения подходит описанию?</h3>
+            <div class="match-grid">
+              <label for="match-macro">Каждый класс имеет одинаковый вес</label>
+              <select id="match-macro" name="match-macro"><option value="">Выберите</option><option value="macro">Macro</option><option value="weighted">Weighted</option><option value="micro">Micro</option></select>
+              <label for="match-weighted">Классы учитываются пропорционально их размеру</label>
+              <select id="match-weighted" name="match-weighted"><option value="">Выберите</option><option value="macro">Macro</option><option value="weighted">Weighted</option><option value="micro">Micro</option></select>
+              <label for="match-micro">Сначала суммируются TP, FP и FN по всем классам</label>
+              <select id="match-micro" name="match-micro"><option value="">Выберите</option><option value="macro">Macro</option><option value="weighted">Weighted</option><option value="micro">Micro</option></select>
+            </div>
+            <div class="feedback" aria-live="polite"></div>
+          </section>
+
           <section class="quiz-question" data-question="reflection">
-            <span class="question-number">Задание 16 · Развёрнутый ответ без оценки</span>
+            <span class="question-number">Задание 25 · Развёрнутый ответ без оценки</span>
             <h3>Объясните своими словами, почему уверенный ответ LLM может быть неверным</h3>
             <label for="reflection-text" class="mini-label">Ваше объяснение</label>
             <textarea id="reflection-text" name="reflection-text" placeholder="Сформулируйте ответ в 2–4 предложениях"></textarea>
@@ -1012,7 +1268,7 @@
     </section>
   </main>
 
-  <footer class="footer page">Конспект собран по всем частям расшифровки первого урока. Очевидные ошибки распознавания терминов исправлены; дополнительные пояснения отделены от содержания лекции.</footer>
+  <footer class="footer page">Конспект собран по всем частям расшифровки первого урока и материалам блока 2 курса Stepik «Внутри LLM: как думает ChatGPT?». Содержание переработано и дополнено простыми объяснениями; дополнительные авторские выводы отделены от материала урока.</footer>
 
   <script>
     (() => {
@@ -1142,7 +1398,16 @@
         q12: () => form.elements.q12.value === 'regex',
         q13: () => form.elements.q13.value === 'small',
         q14: () => sameSet([...form.querySelectorAll('[name="q14"]:checked')].map(el => el.value), ['frozen','adapter','skill']),
-        q15: () => form.elements['match-inference'].value === 'inference' && form.elements['match-attention'].value === 'attention' && form.elements['match-quantization'].value === 'quantization'
+        q15: () => form.elements['match-inference'].value === 'inference' && form.elements['match-attention'].value === 'attention' && form.elements['match-quantization'].value === 'quantization',
+        q16: () => form.elements.q16.value === 'clustering',
+        q17: () => sameSet([...form.querySelectorAll('[name="q17"]:checked')].map(el => el.value), ['translation','summary','paraphrase']),
+        q18: () => form.elements['match-multimodal'].value === 'multimodal' && form.elements['match-agent'].value === 'agent' && form.elements['match-search'].value === 'search',
+        q19: () => form.elements.q19.value === 'random',
+        q20: () => form.elements.q20.value === 'continue',
+        q21: () => form.elements['match-accuracy'].value === 'accuracy' && form.elements['match-precision'].value === 'precision' && form.elements['match-recall'].value === 'recall' && form.elements['match-f1'].value === 'f1',
+        q22: () => form.elements.q22.value === '95',
+        q23: () => form.elements.q23.value === 'precision',
+        q24: () => form.elements['match-macro'].value === 'macro' && form.elements['match-weighted'].value === 'weighted' && form.elements['match-micro'].value === 'micro'
       };
       const explanations = {
         q1: 'Языковая модель строит распределение вероятностей следующего токена по контексту.',
@@ -1159,7 +1424,16 @@
         q12: 'Для точного и неизменного шаблона обычный код или регулярное выражение проще, дешевле и надёжнее LLM.',
         q13: 'Чем выше вероятность правильного токена, тем ближе −log(p) к нулю и тем меньше штраф.',
         q14: 'LoRA обучает небольшой адаптер при замороженных основных весах. Она подходит для навыка или стиля, но не гарантирует свежие знания и не расширяет контекстное окно.',
-        q15: 'Инференс — применение модели, attention — выбор важных связей, квантизация — более компактное хранение весов.'
+        q15: 'Инференс — применение модели, attention — выбор важных связей, квантизация — более компактное хранение весов.',
+        q16: 'Если готовых категорий нет и группы формируются автоматически, это кластеризация. Для классификации классы известны заранее.',
+        q17: 'В seq2seq и вход, и выход являются последовательностями: перевод, суммаризация и парафраз создают новый текст. Спам-фильтр обычно возвращает метку класса.',
+        q18: 'Мультимодальная модель объединяет типы данных, агент выполняет действия через инструменты, а семантический поиск сопоставляет запросы и документы по смыслу.',
+        q19: 'Sampling выбирает токен случайно с учётом вероятностей. Самый вероятный вариант выпадает чаще, но не гарантирован.',
+        q20: 'Fine-tuning продолжает обучение уже готовой модели на специализированной задаче или новом наборе данных.',
+        q21: 'Accuracy оценивает все ответы, Precision — чистоту найденного, Recall — полноту поиска, F1 — баланс Precision и Recall.',
+        q22: 'Модель верно угадывает все 950 объектов A из 1000, поэтому Accuracy = 95%. Но класс B она полностью пропускает.',
+        q23: 'Если ложное срабатывание очень дорого, нужно повышать Precision класса «спам»: среди писем, отправленных в спам, должно быть как можно меньше важных.',
+        q24: 'Macro даёт классам равный вес, weighted учитывает размер классов, micro сначала суммирует ошибки по всем классам.'
       };
 
       form.addEventListener('submit', (event) => {
