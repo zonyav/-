@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Понятный интерактивный курс о NLP, LLM, RAG и ИИ-агентах">
+  <meta name="theme-color" content="#f6f3ed">
+  <title>Внутри LLM — понятный курс</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#lesson">Перейти к уроку</a>
+
+  <header class="topbar">
+    <button class="icon-button menu-button" id="menuButton" type="button" aria-label="Открыть содержание" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <a class="brand" href="#welcome" aria-label="На главную курса">
+      <span class="brand-mark">LLM</span>
+      <span class="brand-name">внутри</span>
+    </a>
+    <div class="top-progress" aria-label="Прогресс курса">
+      <div class="top-progress-copy"><span id="progressText">0% пройдено</span><span id="remainingText">Начинаем</span></div>
+      <div class="progress-track"><span id="progressBar"></span></div>
+    </div>
+    <button class="icon-button theme-button" id="themeButton" type="button" aria-label="Переключить цветовую тему">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42m0-12.72-1.42 1.42M7.06 16.94l-1.42 1.42M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/></svg>
+    </button>
+  </header>
+
+  <div class="drawer-scrim" id="drawerScrim" hidden></div>
+  <aside class="drawer" id="drawer" aria-label="Содержание курса" aria-hidden="true">
+    <div class="drawer-head">
+      <div><span class="eyebrow">Содержание</span><h2>Маршрут курса</h2></div>
+      <button class="icon-button" id="closeDrawer" type="button" aria-label="Закрыть содержание">×</button>
+    </div>
+    <label class="search-box">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.4-4.4m2.4-5.1a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+      <input id="courseSearch" type="search" placeholder="Найти тему или термин">
+    </label>
+    <nav id="courseNav"></nav>
+  </aside>
+
+  <main class="page-shell">
+    <article id="lesson" class="lesson" tabindex="-1" aria-live="polite"></article>
+  </main>
+
+  <nav class="lesson-switcher" aria-label="Навигация между уроками">
+    <button id="prevLesson" type="button"><span>←</span><small>Назад</small><strong id="prevLabel">—</strong></button>
+    <button id="completeLesson" class="complete-button" type="button"><span class="complete-dot">✓</span><strong>Отметить урок пройденным</strong></button>
+    <button id="nextLesson" type="button"><small>Дальше</small><strong id="nextLabel">—</strong><span>→</span></button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <noscript>Для интерактивной навигации и тестов нужно включить JavaScript.</noscript>
+  <script src="course-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
