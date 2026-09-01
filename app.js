@@ -33,10 +33,22 @@
     return String(index + 1).padStart(2, "0");
   }
 
+  function lessonWord(value) {
+    const mod100 = value % 100;
+    const mod10 = value % 10;
+    if (mod100 >= 11 && mod100 <= 14) return "уроков";
+    if (mod10 === 1) return "урок";
+    if (mod10 >= 2 && mod10 <= 4) return "урока";
+    return "уроков";
+  }
+
   function renderNav(filter = "") {
     const query = filter.trim().toLocaleLowerCase("ru");
     navEl.innerHTML = course.modules.map((module) => {
-      const moduleLessons = module.lessons.filter((lesson) => `${lesson.title} ${lesson.deck}`.toLocaleLowerCase("ru").includes(query));
+      const moduleLessons = module.lessons.filter((lesson) => {
+        const searchable = `${lesson.title} ${lesson.deck} ${lesson.body.replace(/<[^>]+>/g, " ")}`;
+        return searchable.toLocaleLowerCase("ru").includes(query);
+      });
       if (!moduleLessons.length) return "";
       return `<section class="nav-module">
         <p class="nav-module-title"><span>${module.number}</span>${module.title}</p>
@@ -101,7 +113,8 @@
     const count = state.completed.length;
     const percent = Math.round((count / lessons.length) * 100);
     progressText.textContent = `${percent}% пройдено`;
-    remainingText.textContent = count === lessons.length ? "Маршрут завершён" : `Осталось ${lessons.length - count} уроков`;
+    const remaining = lessons.length - count;
+    remainingText.textContent = count === lessons.length ? "Маршрут завершён" : `Осталось ${remaining} ${lessonWord(remaining)}`;
     progressBar.style.width = `${percent}%`;
   }
 
@@ -145,6 +158,7 @@
     requestAnimationFrame(() => scrim.classList.add("visible"));
     drawer.classList.add("open");
     drawer.setAttribute("aria-hidden", "false");
+    drawer.removeAttribute("inert");
     menuButton.setAttribute("aria-expanded", "true");
     setTimeout(() => searchInput.focus(), 180);
   }
@@ -153,6 +167,7 @@
     drawer.classList.remove("open");
     scrim.classList.remove("visible");
     drawer.setAttribute("aria-hidden", "true");
+    drawer.setAttribute("inert", "");
     menuButton.setAttribute("aria-expanded", "false");
     setTimeout(() => { if (!drawer.classList.contains("open")) scrim.hidden = true; }, 260);
   }
@@ -172,7 +187,12 @@
   menuButton.addEventListener("click", openDrawer);
   document.querySelector("#closeDrawer").addEventListener("click", closeDrawer);
   scrim.addEventListener("click", closeDrawer);
-  document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeDrawer(); });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && drawer.classList.contains("open")) {
+      closeDrawer();
+      menuButton.focus();
+    }
+  });
   searchInput.addEventListener("input", () => renderNav(searchInput.value));
   navEl.addEventListener("click", (event) => {
     const button = event.target.closest("[data-lesson]");
