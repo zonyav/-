@@ -121,6 +121,7 @@ button { color: inherit; }
 .nav-module { margin-top: 18px; }
 .nav-module-title { display: flex; align-items: center; gap: 10px; margin: 0 8px 6px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 .nav-module-title span { color: var(--accent); }
+.nav-module-title small { margin-left: auto; color: var(--muted); font-size: 10px; letter-spacing: .03em; }
 .nav-link { width: 100%; display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 8px; padding: 10px 9px; border: 0; border-radius: 12px; background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
 .nav-link:hover, .nav-link.active { background: var(--accent-soft); }
 .nav-link small { color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -201,6 +202,25 @@ details > div { padding: 0 20px 18px; color: var(--muted); }
 .source-box { color: var(--muted); font-size: 14px; }
 .source-box a { font-weight: 700; }
 
+.workbook { margin: 28px 0; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.workbook textarea { width: 100%; min-height: 150px; resize: vertical; margin-top: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; outline: none; background: var(--bg); color: var(--ink); font: inherit; line-height: 1.55; }
+.workbook textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.note-status { display: block; min-height: 20px; margin-top: 8px; color: var(--ok); font-size: 12px; }
+.skill-checklist { display: grid; gap: 10px; margin: 22px 0; }
+.skill-item { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); cursor: pointer; }
+.skill-item:has(input:checked) { border-color: color-mix(in srgb, var(--ok) 50%, var(--line)); background: color-mix(in srgb, var(--ok) 8%, var(--surface)); }
+.skill-item input { margin-top: 4px; accent-color: var(--ok); }
+.skill-item strong { display: block; margin-bottom: 4px; }
+.skill-item span { color: var(--muted); font-size: 14px; }
+.skill-progress { color: var(--accent); font-weight: 700; }
+.rubric { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; }
+.rubric th, .rubric td { padding: 13px 14px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+.rubric th { background: var(--surface-2); }
+.case-tag { display: inline-block; margin-bottom: 10px; padding: 5px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.artifact-list { counter-reset: artifact; display: grid; gap: 10px; padding: 0; list-style: none; }
+.artifact-list li { counter-increment: artifact; display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.artifact-list li::before { content: counter(artifact); width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; }
+
 .lesson-switcher {
   position: fixed;
   z-index: 25;
@@ -240,6 +260,7 @@ details > div { padding: 0 20px 18px; color: var(--muted); }
   h1 { font-size: clamp(36px, 12vw, 56px); }
   .lesson-section { margin: 56px 0; }
   .card-grid { grid-template-columns: 1fr; }
+  .rubric { display: block; overflow-x: auto; }
   .card.wide { grid-column: auto; }
   .flow { grid-template-columns: 1fr; }
   .flow-node { min-height: auto; }

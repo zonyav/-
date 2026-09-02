@@ -1,0 +1,9 @@
+# Оставьте пустым, чтобы использовать проект только как retrieval-систему.
+LLM_BASE_URL=
+LLM_API_KEY=
+LLM_MODEL=
+
+# Порог нужно калибровать на своём eval-наборе.
+ANSWERABILITY_THRESHOLD=0.42
+TOP_K=3
+

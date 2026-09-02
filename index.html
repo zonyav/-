@@ -1,62 +1,271 @@
-<!doctype html>
-<html lang="ru" data-theme="light">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Понятный интерактивный курс о NLP, LLM, RAG и ИИ-агентах">
-  <meta name="theme-color" content="#f6f3ed">
-  <title>Внутри LLM — понятный курс</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <a class="skip-link" href="#lesson">Перейти к уроку</a>
+(() => {
+  const course = window.COURSE;
+  const lessons = course.modules.flatMap((module) => module.lessons.map((lesson) => ({ ...lesson, module })));
+  const lessonEl = document.querySelector("#lesson");
+  const navEl = document.querySelector("#courseNav");
+  const drawer = document.querySelector("#drawer");
+  const scrim = document.querySelector("#drawerScrim");
+  const menuButton = document.querySelector("#menuButton");
+  const searchInput = document.querySelector("#courseSearch");
+  const completeButton = document.querySelector("#completeLesson");
+  const progressText = document.querySelector("#progressText");
+  const remainingText = document.querySelector("#remainingText");
+  const progressBar = document.querySelector("#progressBar");
+  const toast = document.querySelector("#toast");
+  const storeKey = "inside-llm-course-v1";
+  let state = readState();
+  let current = lessons[0];
 
-  <header class="topbar">
-    <button class="icon-button menu-button" id="menuButton" type="button" aria-label="Открыть содержание" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-    <a class="brand" href="#welcome" aria-label="На главную курса">
-      <span class="brand-mark">LLM</span>
-      <span class="brand-name">внутри</span>
-    </a>
-    <div class="top-progress" aria-label="Прогресс курса">
-      <div class="top-progress-copy"><span id="progressText">0% пройдено</span><span id="remainingText">Начинаем</span></div>
-      <div class="progress-track"><span id="progressBar"></span></div>
-    </div>
-    <button class="icon-button theme-button" id="themeButton" type="button" aria-label="Переключить цветовую тему">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42m0-12.72-1.42 1.42M7.06 16.94l-1.42 1.42M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/></svg>
-    </button>
-  </header>
+  function readState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storeKey) || "{}");
+      return {
+        completed: Array.isArray(saved.completed)
+          ? saved.completed.filter((id) => lessons.some((lesson) => lesson.id === id))
+          : [],
+        theme: saved.theme || null,
+        notes: saved.notes && typeof saved.notes === "object" ? saved.notes : {},
+        skills: Array.isArray(saved.skills) ? saved.skills : [],
+      };
+    } catch {
+      return { completed: [], theme: null, notes: {}, skills: [] };
+    }
+  }
 
-  <div class="drawer-scrim" id="drawerScrim" hidden></div>
-  <aside class="drawer" id="drawer" aria-label="Содержание курса" aria-hidden="true" inert>
-    <div class="drawer-head">
-      <div><span class="eyebrow">Содержание</span><h2>Маршрут курса</h2></div>
-      <button class="icon-button" id="closeDrawer" type="button" aria-label="Закрыть содержание">×</button>
-    </div>
-    <label class="search-box">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.4-4.4m2.4-5.1a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
-      <input id="courseSearch" type="search" placeholder="Найти тему или термин">
-    </label>
-    <nav id="courseNav"></nav>
-  </aside>
+  function saveState() {
+    localStorage.setItem(storeKey, JSON.stringify(state));
+  }
 
-  <main class="page-shell">
-    <article id="lesson" class="lesson" tabindex="-1" aria-live="polite"></article>
-  </main>
+  function labelNumber(index) {
+    return String(index + 1).padStart(2, "0");
+  }
 
-  <nav class="lesson-switcher" aria-label="Навигация между уроками">
-    <button id="prevLesson" type="button"><span>←</span><small>Назад</small><strong id="prevLabel">—</strong></button>
-    <button id="completeLesson" class="complete-button" type="button"><span class="complete-dot">✓</span><strong>Отметить урок пройденным</strong></button>
-    <button id="nextLesson" type="button"><small>Дальше</small><strong id="nextLabel">—</strong><span>→</span></button>
-  </nav>
+  function lessonWord(value) {
+    const mod100 = value % 100;
+    const mod10 = value % 10;
+    if (mod100 >= 11 && mod100 <= 14) return "уроков";
+    if (mod10 === 1) return "урок";
+    if (mod10 >= 2 && mod10 <= 4) return "урока";
+    return "уроков";
+  }
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <noscript>Для интерактивной навигации и тестов нужно включить JavaScript.</noscript>
-  <script src="course-data.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
+  function renderNav(filter = "") {
+    const query = filter.trim().toLocaleLowerCase("ru");
+    navEl.innerHTML = course.modules.map((module) => {
+      const moduleCompleted = module.lessons.filter((lesson) => state.completed.includes(lesson.id)).length;
+      const moduleLessons = module.lessons.filter((lesson) => {
+        const searchable = `${lesson.title} ${lesson.deck} ${lesson.body.replace(/<[^>]+>/g, " ")}`;
+        return searchable.toLocaleLowerCase("ru").includes(query);
+      });
+      if (!moduleLessons.length) return "";
+      return `<section class="nav-module">
+        <p class="nav-module-title"><span>${module.number}</span>${module.title}<small>${moduleCompleted}/${module.lessons.length}</small></p>
+        ${moduleLessons.map((lesson) => {
+          const index = lessons.findIndex((item) => item.id === lesson.id);
+          const done = state.completed.includes(lesson.id);
+          return `<button class="nav-link ${lesson.id === current.id ? "active" : ""} ${done ? "done" : ""}" type="button" data-lesson="${lesson.id}" ${lesson.id === current.id ? 'aria-current="page"' : ""}>
+            <small>${labelNumber(index)}</small><strong>${lesson.title}</strong><span class="nav-check" aria-hidden="true">✓</span>
+          </button>`;
+        }).join("")}
+      </section>`;
+    }).join("") || `<p class="nav-empty">Ничего не найдено. Попробуйте более короткий запрос.</p>`;
+  }
+
+  function headerFor(lesson) {
+    const lessonIndex = lessons.findIndex((item) => item.id === lesson.id);
+    return `<header class="lesson-header">
+      <div class="lesson-path"><span>Модуль ${lesson.module.number}</span><span>${lesson.module.title}</span><span>Урок ${labelNumber(lessonIndex)}</span></div>
+      <h1>${lesson.title.replace(/(LLM|RAG|Attention|Hugging Face|Fine-tuning|ИИ-агента)/i, "<em>$1</em>")}</h1>
+      <p class="lesson-deck">${lesson.deck}</p>
+      <div class="lesson-meta"><span class="meta-chip">${lesson.time}</span><span class="meta-chip">${lesson.level}</span><span class="meta-chip">${lessonIndex + 1} / ${lessons.length}</span></div>
+    </header>`;
+  }
+
+  function renderLesson(id, pushHash = true) {
+    const found = lessons.find((lesson) => lesson.id === id) || lessons[0];
+    current = found;
+    lessonEl.innerHTML = headerFor(found) + found.body;
+    lessonEl.style.animation = "none";
+    requestAnimationFrame(() => { lessonEl.style.animation = ""; });
+    if (pushHash && location.hash.slice(1) !== found.id) history.pushState(null, "", `#${found.id}`);
+    document.title = `${found.title} — Внутри LLM`;
+    bindQuizzes();
+    bindLearningTools();
+    updateControls();
+    renderNav(searchInput.value);
+    closeDrawer();
+    // A lesson switch is a navigation event: jumping to the new heading is less
+    // disorienting than animating through the previous lesson's content.
+    window.scrollTo({ top: 0, behavior: "auto" });
+    setTimeout(() => lessonEl.focus({ preventScroll: true }), 80);
+  }
+
+  function updateControls() {
+    const index = lessons.findIndex((lesson) => lesson.id === current.id);
+    const prev = lessons[index - 1];
+    const next = lessons[index + 1];
+    const prevButton = document.querySelector("#prevLesson");
+    const nextButton = document.querySelector("#nextLesson");
+    prevButton.disabled = !prev;
+    nextButton.disabled = !next;
+    document.querySelector("#prevLabel").textContent = prev?.title || "Начало";
+    document.querySelector("#nextLabel").textContent = next?.title || "Финиш";
+    prevButton.dataset.target = prev?.id || "";
+    nextButton.dataset.target = next?.id || "";
+    const done = state.completed.includes(current.id);
+    completeButton.classList.toggle("done", done);
+    completeButton.querySelector("strong").textContent = done ? "Урок пройден" : "Отметить урок пройденным";
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const count = state.completed.length;
+    const percent = Math.round((count / lessons.length) * 100);
+    progressText.textContent = `${percent}% пройдено`;
+    const remaining = lessons.length - count;
+    remainingText.textContent = count === lessons.length ? "Маршрут завершён" : `Осталось ${remaining} ${lessonWord(remaining)}`;
+    progressBar.style.width = `${percent}%`;
+  }
+
+  function normalize(value) {
+    return value.toLocaleLowerCase("ru").trim().replace(/ё/g, "е").replace(/[^a-zа-я0-9]+/g, "");
+  }
+
+  function answersFor(quiz) {
+    const checked = [...quiz.querySelectorAll("input:checked")].map((input) => input.value);
+    const text = quiz.querySelector('input[type="text"]');
+    return text ? [normalize(text.value)] : checked.sort();
+  }
+
+  function isCorrectQuiz(quiz) {
+    const expected = quiz.dataset.answer.split(",").map(normalize).sort();
+    const actual = answersFor(quiz).map(normalize).sort();
+    const text = quiz.querySelector('input[type="text"]');
+    if (text) {
+      const alternatives = (quiz.dataset.alternatives || "").split("|").filter(Boolean);
+      return [quiz.dataset.answer, ...alternatives].map(normalize).includes(actual[0]);
+    }
+    return actual.length === expected.length && actual.every((value, index) => value === expected[index]);
+  }
+
+  function bindQuizzes() {
+    lessonEl.querySelectorAll("[data-quiz]").forEach((quiz) => {
+      const button = quiz.querySelector(".check-answer");
+      const feedback = quiz.querySelector(".quiz-feedback");
+      button?.addEventListener("click", () => {
+        const actual = answersFor(quiz);
+        if (!actual.length || actual.every((answer) => !answer)) {
+          feedback.textContent = "Сначала выберите или введите ответ.";
+          feedback.className = "quiz-feedback wrong";
+          return;
+        }
+        const correct = isCorrectQuiz(quiz);
+        feedback.textContent = `${correct ? "Верно. " : "Пока нет. "}${feedback.dataset.explain || ""}`;
+        feedback.className = `quiz-feedback ${correct ? "correct" : "wrong"}`;
+      });
+    });
+  }
+
+  function bindLearningTools() {
+    lessonEl.querySelectorAll("textarea[data-note]").forEach((field) => {
+      const key = `${current.id}:${field.dataset.note}`;
+      field.value = state.notes[key] || "";
+      field.addEventListener("input", () => {
+        state.notes[key] = field.value;
+        saveState();
+        const status = field.closest(".workbook")?.querySelector("[data-note-status]");
+        if (status) {
+          status.textContent = "Сохранено на этом устройстве";
+          clearTimeout(status.hideTimer);
+          status.hideTimer = setTimeout(() => { status.textContent = ""; }, 1800);
+        }
+      });
+    });
+
+    const skillBoxes = [...lessonEl.querySelectorAll("input[data-skill]")];
+    const updateSkillCounter = () => {
+      const checked = skillBoxes.filter((box) => box.checked).length;
+      lessonEl.querySelectorAll("[data-skill-progress]").forEach((label) => {
+        label.textContent = `${checked} из ${skillBoxes.length} навыков отмечено`;
+      });
+    };
+    skillBoxes.forEach((box) => {
+      box.checked = state.skills.includes(box.dataset.skill);
+      box.addEventListener("change", () => {
+        state.skills = box.checked
+          ? [...new Set([...state.skills, box.dataset.skill])]
+          : state.skills.filter((skill) => skill !== box.dataset.skill);
+        saveState();
+        updateSkillCounter();
+      });
+    });
+    updateSkillCounter();
+  }
+
+  function openDrawer() {
+    scrim.hidden = false;
+    requestAnimationFrame(() => scrim.classList.add("visible"));
+    drawer.classList.add("open");
+    drawer.setAttribute("aria-hidden", "false");
+    drawer.removeAttribute("inert");
+    menuButton.setAttribute("aria-expanded", "true");
+    setTimeout(() => searchInput.focus(), 180);
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove("open");
+    scrim.classList.remove("visible");
+    drawer.setAttribute("aria-hidden", "true");
+    drawer.setAttribute("inert", "");
+    menuButton.setAttribute("aria-expanded", "false");
+    setTimeout(() => { if (!drawer.classList.contains("open")) scrim.hidden = true; }, 260);
+  }
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => toast.classList.remove("show"), 1700);
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#15120f" : "#f6f3ed";
+  }
+
+  menuButton.addEventListener("click", openDrawer);
+  document.querySelector("#closeDrawer").addEventListener("click", closeDrawer);
+  scrim.addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && drawer.classList.contains("open")) {
+      closeDrawer();
+      menuButton.focus();
+    }
+  });
+  searchInput.addEventListener("input", () => renderNav(searchInput.value));
+  navEl.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-lesson]");
+    if (button) renderLesson(button.dataset.lesson);
+  });
+  document.querySelector("#prevLesson").addEventListener("click", (event) => event.currentTarget.dataset.target && renderLesson(event.currentTarget.dataset.target));
+  document.querySelector("#nextLesson").addEventListener("click", (event) => event.currentTarget.dataset.target && renderLesson(event.currentTarget.dataset.target));
+  completeButton.addEventListener("click", () => {
+    const isDone = state.completed.includes(current.id);
+    state.completed = isDone ? state.completed.filter((id) => id !== current.id) : [...state.completed, current.id];
+    saveState();
+    updateControls();
+    renderNav(searchInput.value);
+    showToast(isDone ? "Отметка снята" : "Урок отмечен как пройденный");
+  });
+  document.querySelector("#themeButton").addEventListener("click", () => {
+    const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    state.theme = theme;
+    applyTheme(theme);
+    saveState();
+  });
+  window.addEventListener("popstate", () => renderLesson(location.hash.slice(1) || "welcome", false));
+
+  const initialTheme = state.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  applyTheme(initialTheme);
+  renderLesson(location.hash.slice(1) || "welcome", false);
+})();

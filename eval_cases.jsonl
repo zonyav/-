@@ -1,0 +1,3 @@
+case_id,date,version,input_summary,expected,actual,error_layer,severity,hypothesis,next_experiment,result
+example-001,2026-01-01,v1,"вопрос о возврате","refund-card в top-3","delivery-address в top-1",retrieval,medium,"chunk содержит слишком много тем","разделить FAQ по одной теме",pending
+
